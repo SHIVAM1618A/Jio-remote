@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:paddingBottom="8dp"
+        android:text="Not connected" />
+
+    <LinearLayout
+        android:id="@+id/deviceLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btnRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Paired devices refresh karo" />
+
+        <ListView
+            android:id="@+id/deviceListView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/remoteLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btnDisconnect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Disconnect" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnUp"
+                android:layout_width="120dp"
+                android:layout_height="60dp"
+                android:text="UP" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnLeft"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:text="LEFT" />
+
+                <Button
+                    android:id="@+id/btnOk"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:text="OK" />
+
+                <Button
+                    android:id="@+id/btnRight"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:text="RIGHT" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnDown"
+                android:layout_width="120dp"
+                android:layout_height="60dp"
+                android:text="DOWN" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnBack"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:text="BACK" />
+
+                <Button
+                    android:id="@+id/btnHome"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:text="HOME" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnVolDown"
+                    android:layout_width="90dp"
+                    android:layout_height="60dp"
+                    android:text="VOL-" />
+
+                <Button
+                    android:id="@+id/btnMute"
+                    android:layout_width="90dp"
+                    android:layout_height="60dp"
+                    android:text="MUTE" />
+
+                <Button
+                    android:id="@+id/btnVolUp"
+                    android:layout_width="90dp"
+                    android:layout_height="60dp"
+                    android:text="VOL+" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnPower"
+                android:layout_width="120dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="24dp"
+                android:text="POWER" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
