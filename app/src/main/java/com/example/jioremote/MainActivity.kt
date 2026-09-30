@@ -77,15 +77,23 @@ class MainActivity : AppCompatActivity(), JioRemoteConnection.Listener {
         }
     }
 
-    private fun hasPermissions(): Boolean = permissionsNeeded.all {
-        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+    private fun hasPermissions(): Boolean {
+        for (p in permissionsNeeded) {
+            if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
+                return false
+            }
+        }
+        return true
     }
 
     @android.annotation.SuppressLint("MissingPermission")
     private fun loadPairedDevices() {
         if (!hasPermissions()) return
         val bonded = adapter.bondedDevices.toList()
-        val names = bonded.map { "${it.name}\n${it.address}" }
+        val names = ArrayList<String>()
+        for (d in bonded) {
+            names.add(d.name + "\n" + d.address)
+        }
         deviceListView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, names)
         deviceListView.setOnItemClickListener { _, _, position, _ ->
             connectTo(bonded[position])
@@ -101,7 +109,7 @@ class MainActivity : AppCompatActivity(), JioRemoteConnection.Listener {
 
     @android.annotation.SuppressLint("MissingPermission")
     private fun connectTo(device: BluetoothDevice) {
-        statusText.text = "Connecting to ${device.name}..."
+        statusText.text = "Connecting to " + device.name
         connection = JioRemoteConnection(this)
         connection?.connect(device)
         connectedDevice = device
@@ -125,28 +133,27 @@ class MainActivity : AppCompatActivity(), JioRemoteConnection.Listener {
         runOnUiThread {
             deviceLayout.visibility = View.GONE
             remoteLayout.visibility = View.VISIBLE
-            statusText.text = "Connected: ${connectedDevice?.name}"
+            statusText.text = "Connected: " + (connectedDevice?.name ?: "")
         }
     }
 
     private fun setupRemoteButtons() {
-        val map = mapOf(
-            R.id.btnUp to KeyCode.DPAD_UP,
-            R.id.btnDown to KeyCode.DPAD_DOWN,
-            R.id.btnLeft to KeyCode.DPAD_LEFT,
-            R.id.btnRight to KeyCode.DPAD_RIGHT,
-            R.id.btnOk to KeyCode.DPAD_CENTER,
-            R.id.btnBack to KeyCode.BACK,
-            R.id.btnHome to KeyCode.HOME,
-            R.id.btnVolUp to KeyCode.VOLUME_UP,
-            R.id.btnVolDown to KeyCode.VOLUME_DOWN,
-            R.id.btnMute to KeyCode.MUTE,
-            R.id.btnPower to KeyCode.POWER
-        )
-        map.forEach { (id, code) ->
-            findViewById<View>(id).setOnClickListener {
-                connection?.send(BTPacket.remoteEvent(code))
-            }
+        bindKey(R.id.btnUp, KeyCode.DPAD_UP)
+        bindKey(R.id.btnDown, KeyCode.DPAD_DOWN)
+        bindKey(R.id.btnLeft, KeyCode.DPAD_LEFT)
+        bindKey(R.id.btnRight, KeyCode.DPAD_RIGHT)
+        bindKey(R.id.btnOk, KeyCode.DPAD_CENTER)
+        bindKey(R.id.btnBack, KeyCode.BACK)
+        bindKey(R.id.btnHome, KeyCode.HOME)
+        bindKey(R.id.btnVolUp, KeyCode.VOLUME_UP)
+        bindKey(R.id.btnVolDown, KeyCode.VOLUME_DOWN)
+        bindKey(R.id.btnMute, KeyCode.MUTE)
+        bindKey(R.id.btnPower, KeyCode.POWER)
+    }
+
+    private fun bindKey(viewId: Int, code: Int) {
+        findViewById<View>(viewId).setOnClickListener {
+            connection?.send(BTPacket.remoteEvent(code))
         }
     }
 
@@ -166,18 +173,26 @@ class MainActivity : AppCompatActivity(), JioRemoteConnection.Listener {
         }
     }
 
-    // ---- JioRemoteConnection.Listener ----
-
     override fun onConnected() {
         showRemote()
     }
 
     override fun onDisconnected(error: String?) {
+        val message = "Disconnected: " + (error ?: "connection closed")
         runOnUiThread {
-            Toast.makeText(this, "Disconnected: ${error ?: "connection closed"}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
         showDeviceList()
     }
 
     override fun onPacket(type: Int, payload: ByteArray) {
-        Log.d("JioRemote", "pack
+        val hexBuilder = StringBuilder()
+        for (b in payload) {
+            hexBuilder.append(String.format("%02x ", b))
+        }
+        Log.d("JioRemote", "packet type=" + type + " raw=" + hexBuilder.toString())
+        if (type == BTPacketType.PAIRING_REQUEST_PIN) {
+            promptPin()
+        }
+    }
+}
