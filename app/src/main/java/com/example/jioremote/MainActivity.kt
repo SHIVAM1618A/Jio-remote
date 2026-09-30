@@ -19,6 +19,73 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import java.io.ByteArrayOutputStream
+
+object BTPacketType {
+    const val CONNECTION = 1
+    const val CONNECTION_ACK = 2
+    const val REMOTE_EVENT = 7
+    const val VOLUME_UPDATE = 13
+    const val SOFT_KEYBOARD = 18
+    const val PAIRING_REQUEST_PIN = 57
+}
+
+object KeyCode {
+    const val HOME = 3
+    const val BACK = 4
+    const val DPAD_UP = 19
+    const val DPAD_DOWN = 20
+    const val DPAD_LEFT = 21
+    const val DPAD_RIGHT = 22
+    const val DPAD_CENTER = 23
+    const val VOLUME_UP = 24
+    const val VOLUME_DOWN = 25
+    const val POWER = 26
+    const val MUTE = 164
+}
+
+object BTPacket {
+
+    private fun frame(payload: ByteArray): ByteArray {
+        val out = ByteArrayOutputStream()
+        val len = payload.size
+        out.write((len shr 8) and 0xFF)
+        out.write(len and 0xFF)
+        out.write(0)
+        out.write(payload)
+        return out.toByteArray()
+    }
+
+    fun remoteEvent(keyCode: Int, action: Int = 0): ByteArray {
+        val payload = ByteArrayOutputStream()
+        payload.write(BTPacketType.REMOTE_EVENT)
+        payload.write((keyCode shr 8) and 0xFF)
+        payload.write(keyCode and 0xFF)
+        payload.write((action shr 24) and 0xFF)
+        payload.write((action shr 16) and 0xFF)
+        payload.write((action shr 8) and 0xFF)
+        payload.write(action and 0xFF)
+        return frame(payload.toByteArray())
+    }
+
+    fun pairingPin(event: Int, text: String): ByteArray {
+        val payload = ByteArrayOutputStream()
+        payload.write(BTPacketType.PAIRING_REQUEST_PIN)
+        payload.write((event shr 24) and 0xFF)
+        payload.write((event shr 16) and 0xFF)
+        payload.write((event shr 8) and 0xFF)
+        payload.write(event and 0xFF)
+        payload.write(text.toByteArray(Charsets.UTF_8))
+        return frame(payload.toByteArray())
+    }
+
+    fun softKeyboard(text: String): ByteArray {
+        val payload = ByteArrayOutputStream()
+        payload.write(BTPacketType.SOFT_KEYBOARD)
+        payload.write(text.toByteArray(Charsets.UTF_8))
+        return frame(payload.toByteArray())
+    }
+}
 
 class MainActivity : AppCompatActivity(), JioRemoteConnection.Listener {
 
