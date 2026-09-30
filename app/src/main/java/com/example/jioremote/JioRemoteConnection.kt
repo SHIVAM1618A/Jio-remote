@@ -29,6 +29,14 @@ class JioRemoteConnection(private val listener: Listener) {
     private val executor = Executors.newCachedThreadPool()
     @Volatile private var running = false
 
+    private fun toHex(data: ByteArray): String {
+        val sb = StringBuilder()
+        for (b in data) {
+            sb.append(String.format("%02x ", b))
+        }
+        return sb.toString()
+    }
+
     @SuppressLint("MissingPermission")
     fun connect(device: BluetoothDevice) {
         executor.execute {
@@ -62,13 +70,8 @@ class JioRemoteConnection(private val listener: Listener) {
                 val payload = ByteArray(len)
                 if (!readFully(inp, payload, len)) break
 
-                Log.d(
-                    TAG,
-                    "RX len=$len flag=${flagBuf[0]} raw=${payload.joinToString(" ") { "%02x".format(it) }}"
-                )
+                Log.d(TAG, "RX len=" + len + " flag=" + flagBuf[0] + " raw=" + toHex(payload))
 
-                // flagBuf[0] == 1 would mean the payload is AES-encrypted.
-                // Not handled in this MVP build — see README "Known gaps".
                 if (payload.isNotEmpty()) {
                     listener.onPacket(payload[0].toInt() and 0xFF, payload)
                 }
@@ -94,7 +97,7 @@ class JioRemoteConnection(private val listener: Listener) {
     fun send(packet: ByteArray) {
         executor.execute {
             try {
-                Log.d(TAG, "TX raw=${packet.joinToString(" ") { "%02x".format(it) }}")
+                Log.d(TAG, "TX raw=" + toHex(packet))
                 output?.write(packet)
                 output?.flush()
             } catch (e: IOException) {
